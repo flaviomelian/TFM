@@ -1,0 +1,57 @@
+services:
+  # --- BASE DE DATOS ---
+  db:
+    image: mysql:8.0
+    container_name: tfm_mysql
+    restart: always
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: tfm_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+
+  # --- IA API (FASTAPI) ---
+  ai-api:
+    build: ./backend/fastapi
+    container_name: tfm_fastapi
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/fastapi/models:/app/models # Para que no tengas que meter los modelos en la imagen
+    environment:
+      - MODEL_PATH=/app/models/category_model.keras
+
+  # --- BACKEND (SPRING BOOT) ---
+  spring-app:
+    build: ./backend/spring
+    container_name: tfm_spring
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      ai-api:
+        condition: service_started
+    volumes:
+      - ./backend/spring/.env:/app/.env
+    environment:
+      - DB_URL=jdbc:mysql://db:3306/tfm_db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - FASTAPI_URL=http://ai-api:8000
+
+  # --- FRONTEND ---
+  frontend:
+    build: ./frontend
+    container_name: tfm_frontend
+    ports:
+      - "3001:3000"
+    depends_on:
+      - spring-app

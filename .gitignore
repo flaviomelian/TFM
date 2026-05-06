@@ -1,2 +1,5 @@
 mysql_data/
 mysql_data/
+backend/spring/target/
+backend/fastapi/__pycache__/
+backend/fastapi/*.pyc
