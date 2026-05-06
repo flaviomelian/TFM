@@ -1,0 +1,4 @@
+models/
+glove.6B/
+__pycache__/
+*.keras
