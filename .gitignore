@@ -3,3 +3,8 @@ mysql_data/
 backend/spring/target/
 backend/fastapi/__pycache__/
 backend/fastapi/*.pyc
+backend/spring/target/
+backend/fastapi/venv/
+backend/fastapi/glove.6B/
+backend/fastapi/__pycache__/
+backend/fastapi/*.png
